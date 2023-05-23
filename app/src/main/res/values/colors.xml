@@ -8,4 +8,5 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFF</color>
     <color name="card_blue_bg">#D6E3F8</color>
+    <color name="card_blue_tb">#181818</color>
 </resources>
