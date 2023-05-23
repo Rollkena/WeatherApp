@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/imageView3"
-        android:layout_width="521dp"
-        android:layout_height="782dp"
+        android:layout_width="755dp"
+        android:layout_height="1100dp"
         android:scaleType="fitXY"
         android:src="@drawable/img"
         app:layout_constraintBottom_toBottomOf="parent"
