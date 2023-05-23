@@ -1,8 +1,12 @@
 package com.example.weatherapp.Fragments
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -19,12 +23,14 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.example.weatherapp.Adapters.VpAdapter
 import com.example.weatherapp.Adapters.WeatherModel
+import com.example.weatherapp.DialogManager
 import com.example.weatherapp.MainViewModel
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.FragmentMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
@@ -62,7 +68,12 @@ class MainFragment : Fragment() {
         checkPermission()
         init()
         updateCurrentCard()
-        getLocation()
+    }
+
+    //делаем продолжение работы при возврате пользователя в приложение
+    override fun onResume() {
+        super.onResume()
+        checkLocation()
     }
 
     //инициализируем отображение списков во вкладках и переключение
@@ -74,8 +85,36 @@ class MainFragment : Fragment() {
             tab.text = tLits[pos]
         }.attach()
         ibSync.setOnClickListener{
-            getLocation()
             tabLayout4.selectTab(tabLayout4.getTabAt(0))
+            checkLocation()
+        }
+        ibSearch.setOnClickListener{
+            DialogManager.searchByName(requireContext(), object : DialogManager.Listener{
+                override fun onClick(name: String?) {
+                    if (name != null) {
+                        requestWeatherData(name)
+                    }
+                }
+            })
+        }
+    }
+
+    //проверяем включена ли локация
+    private fun isLocationEnabled(): Boolean {
+        val lm = activity?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
+    //отсылаем пользователя включать GPS
+    private fun checkLocation(){
+        if(isLocationEnabled()){
+            getLocation()
+        } else {
+            DialogManager.locationSettingsDialog(requireContext(), object : DialogManager.Listener{
+                override fun onClick(name: String?) {
+                    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+            })
         }
     }
 
@@ -93,11 +132,12 @@ class MainFragment : Fragment() {
             return
         }
         fLocationClient
-            .getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, ct.token)
+            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, ct.token)
             .addOnCompleteListener {
                 requestWeatherData("${it.result.latitude},${it.result.longitude}")
             }
     }
+
 
     //обновление данных главной карточки
     private fun updateCurrentCard() = with(binding){
