@@ -1,7 +1,6 @@
 package com.example.weatherapp.Fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,9 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weatherapp.Adapters.WeatherAdapter
 import com.example.weatherapp.Adapters.WeatherModel
 import com.example.weatherapp.MainViewModel
-import com.example.weatherapp.R
 import com.example.weatherapp.databinding.FragmentHoursBinding
-import com.squareup.picasso.Picasso
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -41,7 +38,7 @@ class HoursFragment : Fragment() {
 
     private fun initRcView() = with(binding){
         rcView.layoutManager = LinearLayoutManager(activity)
-        adapter = WeatherAdapter()
+        adapter = WeatherAdapter(null)
         rcView.adapter = adapter
     }
 
@@ -53,7 +50,7 @@ class HoursFragment : Fragment() {
                 wItem.city,
                 (hoursArray[i] as JSONObject).getString("time"),
                 (hoursArray[i] as JSONObject).getJSONObject("condition").getString("text"),
-                (hoursArray[i] as JSONObject).getString("temp_c") + "C",
+                (hoursArray[i] as JSONObject).getString("temp_c").toFloat().toInt().toString() + "C",
                 "",
                 "",
                 (hoursArray[i] as JSONObject).getJSONObject("condition").getString("icon"),
